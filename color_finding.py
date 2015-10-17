@@ -8,7 +8,7 @@ import cv2
 image = cv2.imread('test.png')
 # define the list of boundaries
 boundaries = [
-	([17, 15, 100], [50, 56, 200])#, red in BGR
+	([20,20,60], [244, 194, 194])#, red in BGR
 	#([86, 31, 4], [220, 88, 50]),
 	#([25, 146, 190], [62, 174, 250]),
 	#([103, 86, 65], [145, 133, 128])
