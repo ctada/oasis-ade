@@ -27,7 +27,23 @@ for (lower, upper) in boundaries:
 	output = cv2.bitwise_and(image, image, mask = mask)
  
 	# show the images
+	cv2.namedWindow('images', cv2.WINDOW_NORMAL)
 	cv2.imshow("images", np.hstack([image, output]))
-	cv2.waitKey(0)
 
-	cv2.imwrite("images.png", np.hstack([image,output]))
+	# displays the mask
+	# cv2.namedWindow('mask', cv2.WINDOW_NORMAL)
+	# cv2.imshow("mask", mask)
+
+	#find and draw contours
+	im, contours, hierarchy = cv2.findContours(mask, 1, 2)
+	cv2.drawContours(image,contours,-1,(128,255,40),5)
+	cv2.namedWindow('contours', cv2.WINDOW_NORMAL)
+	cv2.imshow('contours', image)
+
+
+	#might be better to use blob detection
+
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()
+
+	# cv2.imwrite("images.png", np.hstack([image,output]))
