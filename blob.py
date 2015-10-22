@@ -11,6 +11,13 @@ detector = cv2.SimpleBlobDetector_create(params)
  
 # Detect blobs.
 keypoints = detector.detect(im)
+count = 0
+for i in keypoints:
+	
+	x = keypoints[count].pt[0] #i is the index of the blob you want to get the position
+	y = keypoints[count].pt[1]
+	count+=1
+	print x,y
  
 # Draw detected blobs as red circles.
 # cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS ensures the size of the circle corresponds to the size of blob
