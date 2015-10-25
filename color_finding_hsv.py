@@ -3,9 +3,24 @@
 import numpy as np
 import argparse
 import cv2
+from picamera.array import PiRGBArray
+from picamera import PiCamera
+import time
+ 
+# initialize the camera and grab a reference to the raw camera capture
+camera = PiCamera()
+rawCapture = PiRGBArray(camera)
+ 
+# allow the camera to warmup
+time.sleep(0.1)
+ 
+# grab an image from the camera
+camera.capture(rawCapture, format="bgr")
+image = rawCapture.array
+
  
 # load the image
-image = cv2.imread('test.png')
+# image = cv2.imread('test.png')
 hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV) #have to convert back for imshow
 # define the list of boundaries
 
