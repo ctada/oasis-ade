@@ -9,11 +9,14 @@ def read_image_file():
 	args = vars(ap.parse_args())
 	image = cv2.imread(args["image"])
 	return image
-
+def threshold(image):
+	src = cv2.imread(image); 
+	th, dst = cv2.threshold(src,0,150, cv2.THRESH_TOZERO); 
+	cv2.imwrite("opencv-thresh-trunc.jpg", dst);
 def hsv_finding():
 	image=read_image_file()
 	hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
-	boundaries = [([0,50,50], [10, 255, 255])] #A thing to fiddle with in order to capture all the reds
+	boundaries = [([15, 15, 150], [150, 150, 250])] #A thing to fiddle with in order to capture all the reds
 
 	for (lower, upper) in boundaries:
 		lower = np.array(lower, dtype = "uint8")
@@ -25,18 +28,18 @@ def hsv_finding():
 		return output
 
 def blob():
-	im = hsv_finding()
+	im = cv2.imread("opencv-thresh-trunc.jpg")
 
 	# Set up the detector with default parameters.
 	params = cv2.SimpleBlobDetector_Params()
 
-	params.filterByArea = True
-	params.minArea = 22
-	params.maxArea = 25
-	params.maxThreshold = 150
-	params.minThreshold = 1
-	params.filterByInertia = True
-	params.minInertiaRatio = 0.0000001
+	# params.filterByArea = True
+	# params.minArea = 15
+	# # # params.maxThreshold = 200
+	# # params.minThreshold = 10
+	# # params.filterByInertia = True
+	# params.minInertiaRatio = 0.02
+	# # # params.maxInertiaRatio = 0.15
 
 
 	detector = cv2.SimpleBlobDetector_create(params)
@@ -61,5 +64,5 @@ def blob():
 	cv2.imshow("Keypoints", im_with_keypoints)
 	cv2.waitKey(0)
 
-if __name__ == "__main__":
-	blob()
+threshold("4tube720x720.jpg")
+blob()

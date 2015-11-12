@@ -7,19 +7,65 @@ def imageRead(filename):
 	im = cv2.imread(filename)
 	return im
 
+def markdetect(im):
+	boundaries = [
+	([0,250,40], [10, 255, 50])]
+	# marker is 48,255,0
+	#BGR vs RGB
+	# loop over the boundaries
+	for (lower, upper) in boundaries:
+		# create NumPy arrays from the boundaries
+		lower = np.array(lower, dtype = "uint8")
+		upper = np.array(upper, dtype = "uint8")
+
+	detector1 = cv2.SimpleBlobDetector_create()
+
+	mask = cv2.inRange(im, lower, upper)
+	cv2.namedWindow('markermask', cv2.WINDOW_NORMAL)
+	cv2.imshow("markermask", mask)
+	# mask = cv2.inRange(im, np.array([17.,15.,100.]), np.array([50.,56.,200.]))
+
+	keypoints1 = detector1.detect(mask)
+	print keypoints1
+	print len(keypoints1)
+	im_with_keypoints = cv2.drawKeypoints(mask, keypoints1, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+	cv2.imshow("AnneandPinar", im_with_keypoints)
+	cv2.waitKey(0)
+		# count1 = 0
+		# for i in keypoints1:
+		# 	list1=[]
+		# 	x1 = keypoints1[count1].pt[0] #i is the index of the blob you want to get the position
+		# 	y1 = keypoints1[count1].pt[1]
+		# 	count1 += 1
+		# 	list1.append((x1,y1))
+		# 	return list1
+
+def getMarkerPolar(im, divisions, markerCoordinates):
+	c = convertToPolarCoordinates(im, markerCoordinates)
+	for j in c:
+		for i in divisions:
+			start, end = divisions.get(i)
+			if j>=0:
+				if j>=start and j<end:
+					return i
+			else:
+				if(start < 0 or end<0) and ( (abs(j)<abs(start) and (abs(j)>abs(end)))):
+					return i
+
+
 def detectBlobs(im):
 	#Setting up parameters. 
 	params = cv2.SimpleBlobDetector_Params()
 	# params.filterByColor = 1
 	# params.blobColor=0.99999999999999995
-	params.filterByArea = True
-	params.minArea = 19 #20
-	params.maxArea = 28 #23
-	params.maxThreshold = 150
-	params.minThreshold = 100
-	params.filterByInertia = True
-	params.minInertiaRatio = 0.09
-	params.maxInertiaRatio = 0.15
+	# params.filterByArea = True
+	# params.minArea = 19 #20
+	# params.maxArea = 28 #23
+	# params.maxThreshold = 150
+	# params.minThreshold = 100
+	# params.filterByInertia = True
+	# params.minInertiaRatio = 0.09
+	# params.maxInertiaRatio = 0.15
 	detector = cv2.SimpleBlobDetector_create(params)
 	# Detect blobs.
 	keypoints = detector.detect(im)
@@ -96,16 +142,17 @@ def drawRegions(image, divisions, keypoints):
 		angles.append(start)
 
 	count=1
+	height, width = im.shape[:2]
 	for angle in angles:
-		length=360
+		length=width/2
 		alpha = angle * math.pi / 180.0
 		cos = math.cos(alpha)
 		sin = math.sin(alpha)
-		x= ( 360 - (length * cos))
-		y= (360 - (length*sin))
-		pt1=(360,360)
+		x= ( length - (length * cos))
+		y= (length - (length*sin))
+		pt1=(length,length)
 		pt2=(int(x),int(y))
-		img2 = cv2.line(im, pt1, pt2, [255,255,255], thickness=1, lineType=8, shift=0)
+		img2 = cv2.line(im, pt1, pt2, [255,255,255], thickness=3, lineType=8, shift=0)
 		img2=cv2.putText(im,str(count), pt2, cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255))
 		count+=1
 	cv2.namedWindow('line', cv2.WINDOW_NORMAL)
@@ -124,13 +171,18 @@ def printTubeStatus(positives, numDivisions):
 	return status
 
 def main(numDivisions, startAngle, filename):
-	im = imageRead(filename)
-	keypoints= detectBlobs(im)
-	divisions=divideIntoRegions(startAngle,numDivisions)
-	polarCoordinates = convertToPolarCoordinates(im, getBlobCoordinates(keypoints))
-	positives = checkRegionOfRed(divisions, polarCoordinates)
-	print positives
-	print printTubeStatus(positives, 12)
-	drawRegions(im, divisions, keypoints)
+	# im = imageRead(filename)
+	im = cv2.imread(filename)
+	markdetect(im)
+	# keypoints= detectBlobs(im)
+	# divisions=divideIntoRegions(startAngle,numDivisions)
+	# marker = getMarkerPolar(im, divisions, markerCoor)
+	# print markerCoor
+	# print "Marker in region: ", marker
+	# polarCoordinates = convertToPolarCoordinates(im, getBlobCoordinates(keypoints))
+	# positives = checkRegionOfRed(divisions, polarCoordinates)
+	# print positives
+	# print printTubeStatus(positives, 12)
+	# drawRegions(im, divisions, keypoints)
 
 main(6, 30, "4tube720x720.jpg")

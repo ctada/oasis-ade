@@ -5,7 +5,7 @@ import argparse
 import cv2
  
 # load the image
-image = cv2.imread('test.png')
+image = cv2.imread('tube3000x3000.jpg')
 hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV) #have to convert back for imshow
 # define the list of boundaries
 
@@ -36,6 +36,10 @@ for (lower, upper) in boundaries:
 	cv2.namedWindow('images', cv2.WINDOW_NORMAL)
 	cv2.imshow("images", np.hstack([image, output]))
 
+
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()
+	
 	# displays the mask
 	# cv2.namedWindow('mask', cv2.WINDOW_NORMAL)
 	# cv2.imshow("mask", mask)
