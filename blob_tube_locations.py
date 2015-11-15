@@ -1,10 +1,11 @@
 import cv2
 import numpy as np;
 import math
+import argparse
 
 def imageRead(filename):
-	#openCV reads the image
 	im = cv2.imread(filename)
+
 	return im
 
 def markdetect(im):
@@ -114,9 +115,10 @@ def checkRegion(divisions, polarCoordinates):
 					positives[c] = i
 	return positives
 
-def drawRegions(image, divisions, keypoints):
-
-	im = cv2.drawKeypoints(image, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+def drawRegions(im, divisions, coordinates):
+	for (x,y) in coordinates:
+		im2 = cv2.circle(im, (int(x),int(y)), 100, (0,0,255), 8, 8, 0)
+	# # im_with_keypoints = cv2.drawKeypoints(im, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 	angles=[]
 	for i in divisions:
 		start, end = divisions.get(i)
@@ -133,11 +135,11 @@ def drawRegions(image, divisions, keypoints):
 		y= (length - (length*sin))
 		pt1=(length,length)
 		pt2=(int(x),int(y))
-		img2 = cv2.line(im, pt1, pt2, [255,255,255], thickness=5, lineType=8, shift=0)
-		img2=cv2.putText(im,str(count), pt2, cv2.FONT_HERSHEY_DUPLEX, 12, (255,255,255), thickness=3)
+		im2 = cv2.line(im2, pt1, pt2, [255,255,255], thickness=5, lineType=8, shift=0)
+		im2=cv2.putText(im2,str(count), pt2, cv2.FONT_HERSHEY_DUPLEX, 12, (255,255,255), thickness=3)
 		count+=1
 	cv2.namedWindow('line', cv2.WINDOW_NORMAL)
-	cv2.imshow('line', img2)
+	cv2.imshow('line', im2)
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 
@@ -152,20 +154,30 @@ def printTubeStatus(positives, numDivisions):
 	return status
 
 def main(numDivisions, startAngle, filename):
-	im = imageRead(filename)
+		#openCV reads the image	ap=argparse.ArgumentParser()
+	ap=argparse.ArgumentParser()
+	ap.add_argument("-i", "--image", help="path to the image")
+	ap.add_argument("-d", "--divisions", help="number of divisions")
+	ap.add_argument("-a", "--angle", help = "starting angle")
+	args = vars(ap.parse_args())
+
+	divisionNum = int(args["divisions"])
+	startAngle=int(args["angle"])
+	im = imageRead(args["image"])
+
 	markerCoor= markdetect(im)
 	markerPolar= convertToPolarCoordinates(im,markerCoor)
-	divisions = divideIntoRegions(0,6)
+	divisions = divideIntoRegions(startAngle,divisionNum)
 	keypoints = detectBlobs(im)
 
 	redCoord = blob(im)
 	redPolar = convertToPolarCoordinates(im, redCoord)
 	positives= checkRegion(divisions, redPolar)
-	print printTubeStatus(positives, 6)
+	print printTubeStatus(positives, divisionNum)
 	markerRegion = checkRegion(divisions ,markerPolar)
 	print "Marker in region: ", markerRegion.values()
-	drawRegions(im, divisions, keypoints)
-	drawBlobs(im,redCoord)
+	drawRegions(im, divisions, redCoord)
+	# drawBlobs(im,redCoord)
 
 
 
