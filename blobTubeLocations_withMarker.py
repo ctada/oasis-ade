@@ -5,7 +5,7 @@ import argparse
 
 def imageRead(filename):
 	im = cv2.imread(filename)
-
+	
 	return im
 
 def markdetect(im):
@@ -34,13 +34,13 @@ def detectBlobs(im):
 	#Setting up parameters. 
 	params = cv2.SimpleBlobDetector_Params()
 	params.filterByArea = True
-	params.minArea = 100
-	params.maxArea = 50000000
-	# params.maxThreshold = 150
+	params.minArea = 10
+	params.maxArea = 500000
+	# params.maxThreshold= 150
 	# params.minThreshold = 100
 	# params.filterByInertia = True
-	# params.minInertiaRatio = 0.09
-	# params.maxInertiaRatio = 0.15
+	# params.minInertiaRatio = 0.0000000001
+	# params.maxInertiaRatio = 5
 	detector = cv2.SimpleBlobDetector_create(params)
 	# Detect blobs.
 	keypoints = detector.detect(im)
