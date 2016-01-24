@@ -1,25 +1,47 @@
 import cv2
+import Image
 import numpy as np;
 import math
 import argparse
+import collections
+
+## Most recent version -- end of Fall 2015
+
+def imageMask(imageFile, maskFile):
+	"""
+	Combines the image from hardware with a mask image. Saves it in the repository.
+	Returns the 
+	"""
+	background = Image.open("image1.png")
+	foreground = Image.open("mask0.png")
+
+	Image.alpha_composite(background, foreground).save("maskedImage.png")
+	im = cv2.imread("maskedImage.png")
+	return im
 
 def imageRead(filename):
-	im = cv2.imread(filename)
-	
+	"""
+	Reads in the image for opencv.
+	"""
+	im = cv2.imread(filename)	
 	return im
 
 def markdetect(im):
-	boundaries = [
-	([0,200,10], [10, 255, 50])]
-	# 15 240 4 RGB  BGR = 4 240 15
-	# marker is 48,255,0
+	"""
+	Detects the green marker and returns its Cartesian coordinates.
+	"""
+	boundaries = [([0,200,0], [50, 255, 50])] # the range for green color to detect the marker.
 	for (lower, upper) in boundaries:
 		# create NumPy arrays from the boundaries
 		lower = np.array(lower, dtype = "uint8")
 		upper = np.array(upper, dtype = "uint8")
 
-	detector = cv2.SimpleBlobDetector_create()
+	params = cv2.SimpleBlobDetector_Params()
+	params.filterByColor=True
+	params.blobColor=255
+	detector = cv2.SimpleBlobDetector_create(params)
 	mask = cv2.inRange(im, lower, upper)
+
 	keypoints = detector.detect(mask)
 	cartesianCoordinates=[]
 	count=0
@@ -31,18 +53,26 @@ def markdetect(im):
 	return cartesianCoordinates
 
 def detectBlobs(im):
+	"""
+	Defines some properties of blood blobs. Returns the coordinates of the blobs that have these properties.
+	"""
 	#Setting up parameters. 
 	params = cv2.SimpleBlobDetector_Params()
+	params.filterByColor=True
+	params.blobColor<150
+	params.blobColor>50
+	params.filterByConvexity=True
+	params.minConvexity=0
+	params.maxConvexity = 2
 	params.filterByArea = True
-	params.minArea = 10
-	params.maxArea = 500000
-	# params.maxThreshold= 150
-	# params.minThreshold = 100
-	# params.filterByInertia = True
-	# params.minInertiaRatio = 0.0000000001
-	# params.maxInertiaRatio = 5
+	params.minArea = 70 #7
+	params.maxArea = 900 #900
+	params.maxThreshold= 5000
+	params.minThreshold = 1
+	params.filterByInertia = True
+	params.minInertiaRatio = 0.1
+	params.maxInertiaRatio = 5
 	detector = cv2.SimpleBlobDetector_create(params)
-	# Detect blobs.
 	keypoints = detector.detect(im)
 	return keypoints
 
@@ -56,18 +86,14 @@ def getBlobCoordinates(keypoints):
 		count+=1
 	return cartesianCoordinates
 
-def drawBlobs(im, coordinates):
+def drawBlobs(im, coordinates, keypoints):
 	for (x,y) in coordinates:
-		im2 = cv2.circle(im, (int(x),int(y)), 100, (0,0,255), 8, 8, 0)
-	# # im_with_keypoints = cv2.drawKeypoints(im, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+		im2 = cv2.circle(im, (int(x),int(y)), 30, (0,0,255), 3, 1, 0)
+	im_with_keypoints = cv2.drawKeypoints(im, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 	cv2.namedWindow("Keypoints", cv2.WINDOW_NORMAL)
-	cv2.imshow("Keypoints", im2)
+	cv2.imshow("Keypoints", im)
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
-
-	# im_with_keypoints = cv2.drawKeypoints(im, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-	# cv2.imshow("Keypoints", im_with_keypoints)
-	# cv2.waitKey(0)
 
 def convertToPolarCoordinates(im, cartesianCoordinates):
 	height, width = im.shape[:2]
@@ -100,6 +126,7 @@ def divideIntoRegions(startingAngle, numDivisions):
 		if start == -180:
 			start = 180
 	 	divisions[(numDivisions/2)+i] = (start,end)
+	print divisions
 	return divisions
 
 def checkRegion(divisions, polarCoordinates):
@@ -114,18 +141,30 @@ def checkRegion(divisions, polarCoordinates):
 				if(start < 0 or end<0) and ( (abs(c)<abs(start) and (abs(c)>abs(end)))):
 					positives[c] = i
 	return positives
+def updateDivisions(divisions, markerPolar, numberDivisions):
+	for key, value in markerPolar.iteritems():
+		markerCoord=value
+	newDivisions={}
+	for i in divisions.iterkeys():
+		if [i-(markerCoord-i)]>1:
+			newDivisions[i-(markerCoord-i)]=divisions[i]
+		else:
+			newDivisions[i-(markerCoord-i)+12]=divisions[i]
+	print collections.OrderedDict(sorted(newDivisions.items()))
+	return collections.OrderedDict(sorted(newDivisions.items()))
 
-def drawRegions(im, divisions, coordinates):
-	for (x,y) in coordinates:
-		im2 = cv2.circle(im, (int(x),int(y)), 100, (0,0,255), 8, 8, 0)
+def drawRegions(im, divisions):
+	# for (x,y) in coordinates:
+		# im2 = cv2.circle(im, (int(x),int(y)), 30, (0,0,255), 8, 8, 0)
 	# # im_with_keypoints = cv2.drawKeypoints(im, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 	angles=[]
 	for i in divisions:
 		start, end = divisions.get(i)
 		angles.append(start)
-
+	counts ={}
 	count=1
 	height, width = im.shape[:2]
+	im2=None
 	for angle in angles:
 		length=width/2
 		alpha = angle * math.pi / 180.0
@@ -135,62 +174,52 @@ def drawRegions(im, divisions, coordinates):
 		y= (length - (length*sin))
 		pt1=(length,length)
 		pt2=(int(x),int(y))
-		im2 = cv2.line(im2, pt1, pt2, [255,255,255], thickness=5, lineType=8, shift=0)
-		im2=cv2.putText(im2,str(count), pt2, cv2.FONT_HERSHEY_DUPLEX, 12, (255,255,255), thickness=3)
+		im2 = cv2.line(im, pt1, pt2, [255,255,255], thickness=5, lineType=8, shift=0)
+		im2=cv2.putText(im2,str(count), (int(x),int(y)), cv2.FONT_HERSHEY_DUPLEX, 2, (255,255,255), thickness=2)
+		counts[count]=pt2
 		count+=1
-	cv2.namedWindow('line', cv2.WINDOW_NORMAL)
-	cv2.imshow('line', im2)
-	cv2.waitKey(0)
-	cv2.destroyAllWindows()
+
+	return im2
 
 def printTubeStatus(positives, numDivisions):
 	status={}
 	positiveResults= positives.values()
-	for i in range(numDivisions):
+	for i in range(1,numDivisions+1):
 	 	if i in positiveResults:
-	 		status[i+1] = 'positive'
+	 		status[i] = 'positive'
 	 	else:
-			status[i+1] = 'negative'
+			status[i] = 'negative'
 	return status
 
-def main(numDivisions, startAngle, filename):
-		#openCV reads the image	ap=argparse.ArgumentParser()
-	ap=argparse.ArgumentParser()
-	ap.add_argument("-i", "--image", help="path to the image")
-	ap.add_argument("-d", "--divisions", help="number of divisions")
-	ap.add_argument("-a", "--angle", help = "starting angle")
-	args = vars(ap.parse_args())
-
-	divisionNum = int(args["divisions"])
-	startAngle=int(args["angle"])
-	im = imageRead(args["image"])
+def main(numDivisions, im):
+	# im =imageRead(image)
 
 	markerCoor= markdetect(im)
 	markerPolar= convertToPolarCoordinates(im,markerCoor)
-	divisions = divideIntoRegions(startAngle,divisionNum)
+	print markerPolar
+	divisions = divideIntoRegions(markerPolar[0]-20,divisionNum)
 	keypoints = detectBlobs(im)
+	print checkRegion(divisions, markerPolar)
 
 	redCoord = blob(im)
 	redPolar = convertToPolarCoordinates(im, redCoord)
 	positives= checkRegion(divisions, redPolar)
 	print printTubeStatus(positives, divisionNum)
-	markerRegion = checkRegion(divisions ,markerPolar)
-	print "Marker in region: ", markerRegion.values()
-	drawRegions(im, divisions, redCoord)
-	# drawBlobs(im,redCoord)
+	drawBlobs(drawRegions(im,divisions),redCoord,keypoints)
 
+if __name__ == '__main__':
+	## detecting arguments given by the terminal command:
+	ap=argparse.ArgumentParser()
+	ap.add_argument("-i", "--image", help="path to the image")
+	ap.add_argument("-d", "--divisions", help="number of divisions")
+	ap.add_argument("-a", "--angle", help = "starting angle")
+	ap.add_argument("-m", "--mask", help = "mask image")
 
+	## what these arguments are:
+	args = vars(ap.parse_args())
+	divisionNum = int(args["divisions"])
+	startAngle=float(args["angle"])
+	image = imageMask(args["image"], args["mask"])
 
-	# markerDetect.main()
-	# keypoints= detectBlobs(im)
-	# divisions=divideIntoRegions(startAngle,numDivisions)
-	# marker = getMarkerPolar(im, divisions, markerCoor)
-	# print markerCoor
-	# print "Marker in region: ", marker
-	# polarCoordinates = convertToPolarCoordinates(im, getBlobCoordinates(keypoints))
-	# positives = checkRegionOfRed(divisions, polarCoordinates)
-	# print positives
-	# print printTubeStatus(positives, 12)
-	# drawRegions(im, divisions, keypoints)
-
-main(6, 0, "tube10800x10800marker.jpg")
+	##running the code
+	main(divisionNum, image)
