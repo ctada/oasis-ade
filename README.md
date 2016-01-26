@@ -21,7 +21,7 @@ contains python files:
 **"blob.py"**: Initial blob detection code.
 **"contours.py"**: Contouring the "red sections" based on hsv values. Ask Anne Wilkinson for more info.
 **"blob_and_hsv.py"**: An attempt to run blob detection code on the image masked depending on hsv values.
-**""**:I am not sure what the difference between this and contours.py is. Ask Anne Wilkinson for more info.
+**"color_finding_hsv.py"**:I am not sure what the difference between this and contours.py is. Ask Anne Wilkinson for more info.
 
 ##RasPi: 
 Has images taken using rasPi camera and 
