@@ -14,6 +14,7 @@ class Results(object):
 		"""
 		Runs the "main" function of the imaging class and prints out the results in a dictionary
 		in the form {1: [positive, 5], 2:[negative,1]}
+
 		"""
 		self.imagingClass.main()
 		self.results = self.imagingClass.results
@@ -32,8 +33,8 @@ if __name__ == '__main__':
 	imagingClass = args["class"]
 	classInputs = args["classInputs"]
 
-	from importlib import *
-	find_module(imagingClass) 
+	# my_module = importlib.import_module("{}.{}.{}".format(args["filename"], args["class"], "main()"))
+	# find_module(imagingClass) 
 	# loader = importlib.find_loader(imagingClass, ["home/pinar/Desktop/ADE/oasis-ade/FinalPrototype/blobTubeLocations_withMarker.py"])
 	# import loader
 	# from blobTubeLocations_withMarker import bloodBlobDetection

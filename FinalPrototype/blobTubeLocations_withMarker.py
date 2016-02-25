@@ -91,16 +91,16 @@ class bloodBlobDetection(object):
 		"""
 		#Setting up parameters. 
 		params = cv2.SimpleBlobDetector_Params()
-		params.filterByColor=True
-		params.blobColor<150
-		params.blobColor>50
+		# params.filterByColor=True
+		# params.blobColor<150
+		# params.blobColor>50
 		params.filterByConvexity=True
 		params.minConvexity=0
-		params.maxConvexity = 2
+		params.maxConvexity = 20
 		params.filterByArea = True
-		params.minArea = 70 #7
-		params.maxArea = 900 #900
-		params.maxThreshold= 5000
+		params.minArea = 150 #150
+		params.maxArea = 9000 #900
+		params.maxThreshold= 50000
 		params.minThreshold = 1
 		params.filterByInertia = True
 		params.minInertiaRatio = 0.1
@@ -120,9 +120,9 @@ class bloodBlobDetection(object):
 
 	def drawBlobs(self):
 		# im2=None
-		# for (x,y) in self.blobCartesian:
-		# 	im2 = cv2.circle(self.maskedIm, (int(x),int(y)), 30, (0,0,255), 3, 1, 0)
-		self.blobIm = cv2.drawKeypoints(self.maskedIm, self.keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+		 for (x,y) in self.blobCartesian:
+		 	self.blobIm = cv2.circle(self.maskedIm, (int(x),int(y)), 30, (0,0,255), 3, 1, 0)
+		# self.blobIm = cv2.drawKeypoints(self.maskedIm, self.keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
 
 	def convertToPolarCoordinates(self, cartesianCoordinates):
 		height, width = self.maskedIm.shape[:2]
@@ -218,19 +218,19 @@ class bloodBlobDetection(object):
 		return self.results
 
 
-# if __name__ == '__main__':
+if __name__ == '__main__':
 # 	## detecting arguments given by the terminal command:
-# 	ap=argparse.ArgumentParser()
-# 	ap.add_argument("-i", "--image", help="path to the image")
-# 	ap.add_argument("-d", "--divisions", help="number of divisions")
-# 	ap.add_argument("-m", "--mask", help = "mask image")
+ 	ap=argparse.ArgumentParser()
+ 	ap.add_argument("-i", "--image", help="path to the image")
+ 	ap.add_argument("-d", "--divisions", help="number of divisions")
+ 	ap.add_argument("-m", "--mask", help = "mask image")
 
 # 	## what these arguments are:
-# 	args = vars(ap.parse_args())
-# 	divisionNum = int(args["divisions"])
-# 	imageFile = args["image"]
-# 	maskFile = args["mask"]
+ 	args = vars(ap.parse_args())
+ 	divisionNum = int(args["divisions"])
+ 	imageFile = args["image"]
+ 	maskFile = args["mask"]
 	
 # 	##running the code
-# 	b= bloodBlobDetection(numDiv=divisionNum, imageFile=imageFile, maskFile=maskFile)
-# 	b.main()
+ 	b= bloodBlobDetection([imageFile, maskFile, divisionNum])
+ 	b.main()
