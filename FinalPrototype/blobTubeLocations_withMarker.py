@@ -90,22 +90,43 @@ class bloodBlobDetection(object):
 		Defines some properties of blood blobs. Returns the coordinates of the blobs that have these properties.
 		"""
 		#Setting up parameters. 
+
 		params = cv2.SimpleBlobDetector_Params()
-		# params.filterByColor=True
-		# params.blobColor<150
-		# params.blobColor>50
+		params.filterByColor=True
+		params.blobColor<150
+		params.blobColor>50
 		params.filterByConvexity=True
 		params.minConvexity=0
-		params.maxConvexity = 20
+		params.maxConvexity = 2
 		params.filterByArea = True
-		params.minArea = 150 #150
-		params.maxArea = 9000 #900
-		params.maxThreshold= 50000
+		params.minArea = 150 #7
+		params.maxArea = 900 #900
+		params.maxThreshold= 5000
 		params.minThreshold = 1
 		params.filterByInertia = True
 		params.minInertiaRatio = 0.1
 		params.maxInertiaRatio = 5
 		detector = cv2.SimpleBlobDetector_create(params)
+		# keypoints = detector.detect(im)
+
+
+
+		# params = cv2.SimpleBlobDetector_Params()
+		# params.filterByColor=True
+		# params.blobColor<150
+		# params.blobColor>50
+		# params.filterByConvexity=True
+		# params.minConvexity=0
+		# params.maxConvexity = 20
+		# params.filterByArea = True
+		# params.minArea = 150 #150
+		# params.maxArea = 9000 #900
+		# # params.maxThreshold= 5000
+		# # params.minThreshold = 1
+		# params.filterByInertia = True
+		# params.minInertiaRatio = 0.1
+		# params.maxInertiaRatio = 5
+		# detector = cv2.SimpleBlobDetector_create(params)
 		self.keypoints = detector.detect(self.maskedIm)
 		return self.keypoints
 

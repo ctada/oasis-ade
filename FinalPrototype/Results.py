@@ -3,9 +3,11 @@ import argparse
 import importlib
 
 class Results(object):
-	"""
-	Gives the result of the detection system
-	"""
+	# """
+ #    >>> a=Results(bloodBlobDetection "prototype1NumMask.png maskSquare.png 12")
+ #    >>> a.handleResults()
+ #    {1: ['negative', 1], 2: ['positive', 5], 3: ['negative', 1], 4: ['negative', 1], 5: ['negative', 1], 6: ['positive', 5], 7: ['negative', 1], 8: ['positive', 5], 9: ['negative', 1], 10: ['negative', 1], 11: ['positive', 5], 12: ['negative', 1]}
+	# """
 	def __init__(self, imagingClass, classInputs):
 
 		self.imagingClass=imagingClass(classInputs)
@@ -21,6 +23,8 @@ class Results(object):
 		return self.results
 	
 if __name__ == '__main__':
+	import doctest
+	doctest.testmod()
 
 	ap=argparse.ArgumentParser()
 	ap.add_argument("-f", "--filename", help="the path to the file where the imaging class is located")
@@ -37,9 +41,11 @@ if __name__ == '__main__':
 	# find_module(imagingClass) 
 	# loader = importlib.find_loader(imagingClass, ["home/pinar/Desktop/ADE/oasis-ade/FinalPrototype/blobTubeLocations_withMarker.py"])
 	# import loader
-	# from blobTubeLocations_withMarker import bloodBlobDetection
+	from blobTubeLocations_withMarker import bloodBlobDetection
 	r=Results(bloodBlobDetection, classInputs.split() )
 	print r.handleResults()
+
+	
 
 
 	# _a = __import__(filename, globals(), locals(), [str(imagingClass)], -1)
