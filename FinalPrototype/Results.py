@@ -37,7 +37,7 @@ if __name__ == '__main__':
 	# find_module(imagingClass) 
 	# loader = importlib.find_loader(imagingClass, ["home/pinar/Desktop/ADE/oasis-ade/FinalPrototype/blobTubeLocations_withMarker.py"])
 	# import loader
-	# from blobTubeLocations_withMarker import bloodBlobDetection
+	from blobTubeLocations_withMarker import bloodBlobDetection
 	r=Results(bloodBlobDetection, classInputs.split() )
 	print r.handleResults()
 
